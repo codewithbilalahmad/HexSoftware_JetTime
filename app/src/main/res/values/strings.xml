@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">JetTime</string>
+    <string name="hey">Hey</string>
+    <string name="muhammad">Muhammad</string>
+    <string name="your_actual_time">Your actual timezone</string>
+    <string name="search_timezones">Search timezones</string>
+    <string name="no_timezone_found">No Timezone found.</string>
+    <string name="no_timezone_found_desp">No timezones match your search. Try checking the spelling or search by city, region, or country name.</string>
+    <string name="timezone_converter">Timezone Converter</string>
+    <string name="from">From</string>
+    <string name="timezone">Timezone</string>
+    <string name="select_timezone">Select Timezone</string>
+    <string name="current_timezone">Current Timezone</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="to" />
+    <string name="to_timezone">To</string>
+</resources>
