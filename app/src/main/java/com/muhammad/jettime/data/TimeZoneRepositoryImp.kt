@@ -4,8 +4,12 @@ import android.annotation.SuppressLint
 import com.muhammad.jettime.domain.model.TimeDifference
 import com.muhammad.jettime.domain.model.WorldTime
 import com.muhammad.jettime.domain.repository.TimeZoneRepository
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -23,7 +27,7 @@ class TimeZoneRepositoryImp : TimeZoneRepository {
             val (city, country) = parseCityAndCountry(zoneId)
             WorldTime(
                 zoneId = zoneId,
-                city = city,
+                city = city, date = observeDate(zoneId),
                 country = country, timeDifference = getTimeDifference(zoneId),
                 abbreviation = getAbbreviation(zoneId),
                 time = getFormattedTime(zoneId), isDay = isDayTime(zoneId),
@@ -32,9 +36,55 @@ class TimeZoneRepositoryImp : TimeZoneRepository {
         }
         return timeZones.sortedWith(
             compareByDescending<WorldTime> { it.isCurrentTimezone }.thenBy {
-                it.country
+                it.city
             }
         )
+    }
+
+    override fun convertTimezone(
+        fromZoneId: String,
+        toZoneId: String,
+        date: LocalDate,
+        time: LocalTime,
+    ): WorldTime {
+        val currentTimeZone = getCurrentZoneId()
+        val fromZone = TimeZone.of(fromZoneId)
+        val toZone = TimeZone.of(toZoneId)
+        val fromDateTime = LocalDateTime(date, time)
+        val instant = fromDateTime.toInstant(fromZone)
+        val toDateTime = instant.toLocalDateTime(toZone)
+        val isDay = toDateTime.hour in 6..17
+        val (city, country) = parseCityAndCountry(toZoneId)
+        return WorldTime(
+            zoneId = toZoneId,
+            city = city,
+            country = country,
+            time = formatLocalTime(toDateTime.time),
+            abbreviation = getAbbreviation(toZoneId),
+            isDay = isDay, date = toDateTime.date,
+            timeDifference = getTimeDifference(toZoneId),
+            isCurrentTimezone = toZoneId == currentTimeZone,
+            utcOffset = getUtcOffset(toZoneId)
+        )
+    }
+
+    fun observeDate(zoneId: String): LocalDate {
+        val timezone = TimeZone.of(zoneId)
+        val instant = Clock.System.now()
+        return instant.toLocalDateTime(timezone).date
+    }
+
+    @SuppressLint("DefaultLocale")
+    fun formatLocalTime(time: LocalTime): String {
+        val hour24 = time.hour
+        val hour12 = when {
+            hour24 == 0 -> 12
+            hour24 > 12 -> hour24 - 12
+            else -> hour24
+        }
+        val minute = time.minute
+        val amPm = if (hour24 < 12) "AM" else "PM"
+        return String.format("%02d:%02d %s", hour12, minute, amPm)
     }
 
     fun parseCityAndCountry(zoneId: String): Pair<String, String> {
@@ -57,33 +107,38 @@ class TimeZoneRepositoryImp : TimeZoneRepository {
             else -> hour24
         }
         val amPm = if (hour24 < 12) "AM" else "PM"
-        return String.format("%02d:%02d %s", hour12, minute, amPm)
+        return String.format("%02d : %02d %s", hour12, minute, amPm)
     }
 
     fun getCurrentZoneId(): String {
         return TimeZone.currentSystemDefault().id
     }
 
+    @SuppressLint("DefaultLocale")
     fun getUtcOffset(zoneId: String): String {
         val zone = TimeZone.of(zoneId)
         val instant = Clock.System.now()
         val offsetSeconds = zone.offsetAt(instant).totalSeconds
         val hours = offsetSeconds / 3600
-        val minutes = (abs(offsetSeconds) % 3600) / 60
+        val minutes = abs(offsetSeconds % 3600) / 60
+        val sign = if (offsetSeconds > 0) "+" else "-"
         return if (minutes == 0) {
-            if (hours > 0) "+$hours" else hours.toString()
+            "$sign${abs(hours)}"
         } else {
-            val sign = if (offsetSeconds > 0) "+" else "-"
-            "$sign${abs(hours)}.${minutes * 10 / 60}"
+            String.format("%s%02d:%02d", sign, abs(hours), minutes)
         }
     }
 
     @SuppressLint("NewApi")
     fun getAbbreviation(zoneId: String): String {
-        return ZonedDateTime.now(ZoneId.of(zoneId)).zone.getDisplayName(
+        val zone = ZoneId.of(zoneId)
+        val name = ZonedDateTime.now(zone).zone.getDisplayName(
             TextStyle.SHORT,
             Locale.getDefault()
         )
+        return if (name.startsWith("GMT")) {
+            zone.id.substringAfterLast("/").take(3).uppercase()
+        } else name
     }
 
     fun isDayTime(zoneId: String): Boolean {

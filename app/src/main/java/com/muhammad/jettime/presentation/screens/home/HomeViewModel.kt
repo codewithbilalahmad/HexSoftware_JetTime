@@ -49,7 +49,7 @@ class HomeViewModel(
                     it.copy(
                         worldTimezones = worldTimezones.drop(1),
                         allWorldTimezones = worldTimezones.drop(1),
-                        currentTimezone = worldTimezones.first()
+                        currentTimezone = worldTimezones.first {timezone -> timezone.isCurrentTimezone }
                     )
                 }
                 delay(60_000)

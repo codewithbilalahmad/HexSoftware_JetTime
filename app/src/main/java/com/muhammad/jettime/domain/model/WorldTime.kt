@@ -1,6 +1,7 @@
 package com.muhammad.jettime.domain.model
 
 import androidx.compose.runtime.Immutable
+import kotlinx.datetime.LocalDate
 
 @Immutable
 data class WorldTime(
@@ -8,6 +9,7 @@ data class WorldTime(
     val city: String,
     val country: String,
     val time: String,
+    val date : LocalDate,
     val abbreviation: String,
     val utcOffset: String,
     val timeDifference: TimeDifference,

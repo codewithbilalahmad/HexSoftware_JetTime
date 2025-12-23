@@ -20,18 +20,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.muhammad.jettime.R
 import com.muhammad.jettime.presentation.screens.timezone_converter.components.ConverterDividerSection
 import com.muhammad.jettime.presentation.screens.timezone_converter.components.FromTimezoneSection
+import com.muhammad.jettime.presentation.screens.timezone_converter.components.PrimaryButton
+import com.muhammad.jettime.presentation.screens.timezone_converter.components.SecondaryButton
+import com.muhammad.jettime.presentation.screens.timezone_converter.components.TimezoneConversationSection
+import com.muhammad.jettime.presentation.screens.timezone_converter.components.TimezonePickerBottomSheet
 import com.muhammad.jettime.presentation.screens.timezone_converter.components.ToTimezoneSection
 import org.koin.androidx.compose.koinViewModel
 
@@ -94,7 +100,30 @@ fun TimezoneConverterScreen(
                     fromTimezone = state.selectedFromTimezone,
                     fromDate = state.selectedFromDate,
                     fromTime = state.selectedFromTime,
-                    onFromTimezoneChange = {},
+                    onSelectFromDate = { date ->
+                        viewModel.onAction(TimezoneConverterAction.OnSelectFromDate(date))
+                    },
+                    onPickFromDateClick = {
+                        viewModel.onAction(TimezoneConverterAction.OnToggleFromDatePicker)
+                    },
+                    onPickFromTimeClick = {
+                        viewModel.onAction(TimezoneConverterAction.OnToggleFromTimePicker)
+                    },
+                    onDismissFromDatePicker = {
+                        viewModel.onAction(TimezoneConverterAction.OnToggleFromDatePicker)
+                    },
+                    showFromDatePicker = state.showFromDatePicker,
+                    onSelectFromTime = { time ->
+                        viewModel.onAction(TimezoneConverterAction.OnSelectFromTime(time))
+                    },
+                    onDismissFromTimePicker = {
+                        viewModel.onAction(TimezoneConverterAction.OnToggleFromTimePicker)
+                    },
+                    onToggleFromTimezoneBottomSheet = {
+                        viewModel.onAction(TimezoneConverterAction.OnToggleFromTimezonePicker)
+                    },
+                    showFromTimePicker = state.showFromTimePicker,
+                    showFromTimezonePicker = state.showFromTimezonePicker,
                     isCurrentTimeZone = state.selectedFromTimezone == state.worldTimezones.firstOrNull()
                 )
             }
@@ -111,10 +140,78 @@ fun TimezoneConverterScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp)
                         .animateItem(),
+                    showToTimezonePicker = state.showToTimezonePicker,
                     toTimezone = state.selectedToTimezone,
-                    isCurrentTimeZone = state.selectedToTimezone == state.worldTimezones.firstOrNull()
+                    onToggleToTimezoneBottomSheet = {
+                        viewModel.onAction(TimezoneConverterAction.OnToggleToTimezonePicker)
+                    },
+                    isCurrentTimeZone = state.selectedToTimezone == state.worldTimezones.firstOrNull(),
                 )
+            }
+            if (state.conversionResult != null) {
+                item("TimezoneConversationSection") {
+                    TimezoneConversationSection(
+                        modifier = Modifier
+                            .fillMaxWidth().padding(horizontal = 12.dp)
+                            .animateItem(),
+                        result = state.conversionResult ?: return@item
+                    )
+                }
+            }
+            item("ConvertControlSection") {
+                if (state.conversionResult != null) {
+                    SecondaryButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                            .animateItem(),
+                        text = R.string.reset,
+                        contentPadding = PaddingValues(vertical = 16.dp),
+                        onClick = {
+                            viewModel.onAction(TimezoneConverterAction.OnResetConversion)
+                        },
+                        textStyle = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                    )
+                } else {
+                    PrimaryButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                            .animateItem(),
+                        enabled = state.selectedFromTimezone != null && state.selectedToTimezone != null,
+                        text = R.string.convert,
+                        contentPadding = PaddingValues(vertical = 16.dp),
+                        onClick = {
+                            viewModel.onAction(TimezoneConverterAction.ConvertTimezone)
+                        },
+                        textStyle = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
             }
         }
     }
+    TimezonePickerBottomSheet(
+        selectedTimeZone = state.selectedFromTimezone,
+        onToggleTimezoneBottomSheet = {
+            viewModel.onAction(TimezoneConverterAction.OnToggleFromTimezonePicker)
+        },
+        onSelectTimeZone = { timezone ->
+            viewModel.onAction(TimezoneConverterAction.OnSelectFromTimezone(timezone))
+        }, showTimezoneBottomSheet = state.showFromTimezonePicker,
+        worldTimezones = state.selectedToTimezone?.let { timezone ->
+            state.worldTimezones - timezone
+        } ?: state.worldTimezones
+    )
+    TimezonePickerBottomSheet(
+        selectedTimeZone = state.selectedToTimezone,
+        onToggleTimezoneBottomSheet = {
+            viewModel.onAction(TimezoneConverterAction.OnToggleToTimezonePicker)
+        },
+        onSelectTimeZone = { timezone ->
+            viewModel.onAction(TimezoneConverterAction.OnSelectToTimezone(timezone))
+        }, showTimezoneBottomSheet = state.showToTimezonePicker,
+        worldTimezones = state.selectedFromTimezone?.let { timezone ->
+            state.worldTimezones - timezone
+        } ?: state.worldTimezones
+    )
 }

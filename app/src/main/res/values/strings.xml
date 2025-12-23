@@ -13,6 +13,14 @@
     <string name="current_timezone">Current Timezone</string>
     <string name="date">Date</string>
     <string name="time">Time</string>
-    <string name="to" />
     <string name="to_timezone">To</string>
+    <string name="convert">Convert</string>
+    <string name="cancel">Cancel</string>
+    <string name="done">Done</string>
+    <string name="select_time">Select Time</string>
+    <string name="current">Current</string>
+    <string name="timezone_picker">Timezone Picker</string>
+    <string name="reset">Reset</string>
+    <string name="conversation_result">Conversation Result</string>
+    <string name="difference">Difference</string>
 </resources>

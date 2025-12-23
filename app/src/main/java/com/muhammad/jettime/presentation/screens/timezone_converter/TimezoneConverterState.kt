@@ -17,5 +17,9 @@ data class TimezoneConverterState(
     val selectedFromTime: LocalTime = Clock.System.now()
         .toLocalDateTime(TimeZone.currentSystemDefault()).time,
     val selectedFromTimezone: WorldTime? = null,
-    val selectedToTimezone: WorldTime? = null
+    val selectedToTimezone: WorldTime? = null,
+    val showFromDatePicker: Boolean = false,
+    val showFromTimePicker: Boolean = false,
+    val showFromTimezonePicker: Boolean = false,
+    val showToTimezonePicker: Boolean = false,
 )

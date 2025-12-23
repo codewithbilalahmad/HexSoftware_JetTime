@@ -78,6 +78,7 @@ fun HomeScreen(naHostController: NavHostController, viewModel: HomeViewModel = k
                 AppTextField(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .animateItem()
                         .padding(vertical = 8.dp),
                     value = state.searchQuery,
                     trailingIcon = R.drawable.ic_sort,
@@ -94,6 +95,7 @@ fun HomeScreen(naHostController: NavHostController, viewModel: HomeViewModel = k
                         currentTimezone = timeZone,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .animateItem()
                             .padding(top = 4.dp, bottom = 16.dp)
                     )
                 }
@@ -102,7 +104,7 @@ fun HomeScreen(naHostController: NavHostController, viewModel: HomeViewModel = k
                 items(state.worldTimezones, key = { it.zoneId }) { worldTimezone ->
                     WorldTimezoneCard(
                         worldZonetime = worldTimezone,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().animateItem()
                     )
                 }
             } else {
@@ -110,6 +112,7 @@ fun HomeScreen(naHostController: NavHostController, viewModel: HomeViewModel = k
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .animateItem()
                             .padding(vertical = 32.dp, horizontal = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
