@@ -99,12 +99,18 @@ class TimezoneConverterViewModel(
         _state.update { it.copy(showFromDatePicker = false, selectedFromDate = date) }
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun getWorldTimezones() {
         viewModelScope.launch {
+            var lastMinute = -1
             while (true) {
-                val worldTimezones = timeZoneRepository.getWorldTimeZones()
-                _state.update { it.copy(worldTimezones = worldTimezones) }
-                delay(60_000L)
+                val currentMinute = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).minute
+                if (currentMinute != lastMinute) {
+                    val worldTimezones = timeZoneRepository.getWorldTimeZones()
+                    _state.update { it.copy(worldTimezones = worldTimezones) }
+                    lastMinute = currentMinute
+                }
+                delay(1000L)
             }
         }
     }

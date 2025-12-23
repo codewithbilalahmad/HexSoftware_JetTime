@@ -6,6 +6,10 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class HomeViewModel(
     private val timeZoneRepository: TimeZoneRepository,
@@ -41,18 +45,24 @@ class HomeViewModel(
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun getTimezoneData() {
         viewModelScope.launch {
+            var lasMinute = -1
             while (true) {
-                val worldTimezones = timeZoneRepository.getWorldTimeZones()
-                _state.update {
-                    it.copy(
-                        worldTimezones = worldTimezones.drop(1),
-                        allWorldTimezones = worldTimezones.drop(1),
-                        currentTimezone = worldTimezones.first {timezone -> timezone.isCurrentTimezone }
-                    )
+                val currentMinute = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).minute
+                if(currentMinute != lasMinute){
+                    val worldTimezones = timeZoneRepository.getWorldTimeZones()
+                    _state.update {
+                        it.copy(
+                            worldTimezones = worldTimezones.drop(1),
+                            allWorldTimezones = worldTimezones.drop(1),
+                            currentTimezone = worldTimezones.first {timezone -> timezone.isCurrentTimezone }
+                        )
+                    }
+                    lasMinute = currentMinute
                 }
-                delay(60_000)
+                delay(1000L)
             }
         }
     }

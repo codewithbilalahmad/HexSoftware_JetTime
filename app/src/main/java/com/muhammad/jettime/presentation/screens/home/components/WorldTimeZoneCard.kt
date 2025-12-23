@@ -2,6 +2,7 @@ package com.muhammad.jettime.presentation.screens.home.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -61,8 +62,7 @@ fun WorldTimezoneCard(modifier: Modifier = Modifier, worldZonetime: WorldTime) {
                 )
             }
             Spacer(Modifier.height(12.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Icon(
@@ -80,8 +80,7 @@ fun WorldTimezoneCard(modifier: Modifier = Modifier, worldZonetime: WorldTime) {
                 )
             }
             Spacer(Modifier.height(8.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(

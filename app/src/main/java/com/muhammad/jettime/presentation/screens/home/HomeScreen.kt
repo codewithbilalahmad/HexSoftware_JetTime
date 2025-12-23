@@ -101,7 +101,9 @@ fun HomeScreen(naHostController: NavHostController, viewModel: HomeViewModel = k
                 }
             }
             if (state.worldTimezones.isNotEmpty()) {
-                items(state.worldTimezones, key = { it.zoneId }) { worldTimezone ->
+                items(state.worldTimezones, contentType = {
+                    "worldTimezones"
+                }, key = { it.zoneId }) { worldTimezone ->
                     WorldTimezoneCard(
                         worldZonetime = worldTimezone,
                         modifier = Modifier.fillMaxWidth().animateItem()

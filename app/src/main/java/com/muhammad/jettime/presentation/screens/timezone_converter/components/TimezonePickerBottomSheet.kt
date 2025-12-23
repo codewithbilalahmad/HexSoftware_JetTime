@@ -135,7 +135,9 @@ fun TimezonePickerBottomSheet(
                     }
                     if(filteredTimezones.isNotEmpty()){
                         itemsIndexed(
-                            filteredTimezones,
+                            filteredTimezones, contentType = {_ , _ ->
+                                "filteredTimezones"
+                            },
                             key = { _, timezone -> timezone.zoneId }) { index, timezone ->
                             val isSelected = selectedTimeZone == timezone
                             val shape = when (index) {
